@@ -41,6 +41,7 @@ public class PlayerMovement : MonoBehaviour {
     //Input
     float x, y;
     bool jumping, sprinting, crouching, interact;
+    private bool playerMove;
     
     //Sliding
     private Vector3 normalVector = Vector3.up;
@@ -48,6 +49,7 @@ public class PlayerMovement : MonoBehaviour {
 
     // script grab
     private ArcadeMachine getScript;
+    private Vector3 freeze;
 
     void Awake() {
         rb = GetComponent<Rigidbody>();
@@ -57,16 +59,18 @@ public class PlayerMovement : MonoBehaviour {
         playerScale =  transform.localScale;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        playerMove = true;
     }
 
     
     private void FixedUpdate() {
-        Movement();
+        if (playerMove) Movement();
+        else transform.position = freeze;
     }
 
     private void Update() {
         MyInput();
-        Look();
+        if (playerMove) Look();
     }
 
     /// <summary>
@@ -80,7 +84,7 @@ public class PlayerMovement : MonoBehaviour {
         interact = Input.GetKey(KeyCode.E);
       
         //Crouching
-        if (Input.GetKeyDown(KeyCode.LeftControl))
+        if (Input.GetKeyDown(KeyCode.LeftControl) && playerMove)
             StartCrouch();
         if (Input.GetKeyUp(KeyCode.LeftControl))
             StopCrouch();
@@ -110,9 +114,10 @@ public class PlayerMovement : MonoBehaviour {
     private void TestInteract() {
         RaycastHit hit;
         if (Physics.Raycast(playerCam.transform.position, playerCam.transform.TransformDirection(Vector3.forward), out hit, 5, ~1 << 10)) {
-            // hit.collider.gameObject.onInteract();
             getScript = hit.collider.gameObject.GetComponent<ArcadeMachine>();
             getScript.onInteract();
+            playerMove = false;
+            freeze = transform.position;
         }
     }
 
@@ -120,6 +125,7 @@ public class PlayerMovement : MonoBehaviour {
         if (getScript != null) {
             getScript.onExit();
             getScript = null;
+            playerMove = true;
         }
     }
 

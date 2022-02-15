@@ -4,22 +4,32 @@ using UnityEngine;
 
 public class ArcadeMachine : MonoBehaviour
 {
+    public bool usesMouse;
+    
     public GameObject Game;
     public GameObject Camera;
-
+    public GameObject Manager;
 
     public void onInteract() {
-        Cursor.lockState = CursorLockMode.Confined;
-        Cursor.visible = true;
-        
+        if (usesMouse) MouseUnlock();
         Camera.SetActive(true);
-        Debug.Log("Hit");
+        if (Manager != null) Manager.SetActive(true);
     }
     
     public void onExit() {
+        if (usesMouse) MouseLock();
+        Camera.SetActive(false);
+        if (Manager != null) Manager.SetActive(false);
+    }
+
+    void MouseUnlock() {
+        Cursor.lockState = CursorLockMode.Confined;
+        Cursor.visible = true;
+    }
+
+    void MouseLock() {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        
-        Camera.SetActive(false);
     }
+
 }
